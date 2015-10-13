@@ -142,4 +142,4 @@
       (rally-write-output-to-buffer rally-current-iteration-buffer (rally-fetch-and-parse-current-iteration-info))
       (switch-to-buffer rally-current-iteration-buffer))))
 
-
+(provide 'rally-mode)
