@@ -1,4 +1,7 @@
+;;; rally-mode --- Summary
 ;;; rally-mode.el - a mode to interact with the Rally Software web site.
+
+;;; Commentary:
 
 ;; Copyright (c) 2015 Sean LeBlanc
 
@@ -24,7 +27,18 @@
 
 (require 'url-util)
 
-(setq rally-user "")
+;;; Code: 
+
+(defvar rally-user)
+(defvar rally-password)
+
+(define-derived-mode rally-mode special-mode "rally-mode"
+  "Major mode for interacting with Rally website."
+  :group 'rally-mode)
+
+(define-key rally-mode-map (kbd "g") 'rally-current-iteration)
+
+
 
 (defvar xyz-block-authorisation nil 
    "Flag whether to block url.el's usual interactive authorisation procedure")
@@ -91,7 +105,9 @@
 (defun rally-fetch-current-iteration-info-as-json ()
   (rally-current-iteration-info
    (setq rally-user (read-string "Rally user/email:" rally-user))
-   (read-passwd "Rally password:" nil)))
+   (setq rally-password (read-passwd "Rally password:" nil (if (boundp 'rally-password) rally-password nil )))))
+
+(if (boundp 'rally-password) rally-password nil)
 
 (defun rally-parse-json-results (json-string)
   (json-read-from-string json-string))
@@ -104,15 +120,9 @@
   (mapcar #'rally-extract-info (rally-get-task-list (rally-parse-json-results (rally-fetch-current-iteration-info-as-json)))))
 
 (defun rally-get-buffer ()
-  (let ((buf (get-buffer-create "rally-current-iteration")))
-    (progn 
-      (save-excursion
-	(set-buffer buf)
-	(erase-buffer)
-	buf
-	))))
+  (get-buffer-create "*rally-current-iteration*"))
 
-(setq rally-line-string "%-6s %-60s %-10s %-4s %-4s\n")
+(defvar rally-line-string "%-6s %-60s %-10s %-4s %-4s\n")
 
 (defun rally-write-task-line (parsed-json)
   (insert (format rally-line-string
@@ -124,8 +134,7 @@
 		  )))
 
 (defun rally-write-output-to-buffer (buf parsed-json)
-  (save-excursion
-    (set-buffer buf)
+  (with-current-buffer buf 
     (insert (format rally-line-string
 		    "Story"
 		    "Description"
@@ -136,10 +145,15 @@
     (mapcar #'rally-write-task-line parsed-json)))
 
 (defun rally-current-iteration ()
+  "Pulls up current iteration information for the supplied user."
   (interactive)
+  
   (let ((rally-current-iteration-buffer (rally-get-buffer)))
-    (progn
-      (rally-write-output-to-buffer rally-current-iteration-buffer (rally-fetch-and-parse-current-iteration-info))
-      (switch-to-buffer rally-current-iteration-buffer))))
+    (switch-to-buffer rally-current-iteration-buffer)
+    (rally-mode)
+    (let (buffer-read-only)
+      (erase-buffer)
+      (rally-write-output-to-buffer rally-current-iteration-buffer (rally-fetch-and-parse-current-iteration-info)))))
 
 (provide 'rally-mode)
+;;; rally-mode ends here
