@@ -104,7 +104,7 @@
 
 (defun rally-fetch-current-iteration-info-as-json ()
   (rally-current-iteration-info
-   (setq rally-user (read-string "Rally user/email:" rally-user))
+   (setq rally-user (read-string "Rally user/email:" (if (boundp 'rally-user) rally-user nil)))
    (setq rally-password (read-passwd "Rally password:" nil (if (boundp 'rally-password) rally-password nil )))))
 
 (if (boundp 'rally-password) rally-password nil)
