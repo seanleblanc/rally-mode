@@ -122,7 +122,7 @@
 (defun rally-get-buffer ()
   (get-buffer-create "*rally-current-iteration*"))
 
-(defvar rally-line-string "%-6s %-60s %-10s %-4s %-4s\n")
+(defvar rally-line-string "%-6s %-80s %-10s %-4s %-4s\n")
 
 (defun rally-write-task-line (parsed-json)
   (insert (format rally-line-string
