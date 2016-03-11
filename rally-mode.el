@@ -252,11 +252,18 @@
 
 (defun rally-insert-html (html &optional base-url)
   (shr-insert-document
-   (if (elfeed-libxml-supported-p)
+   (if (rally-libxml-supported-p)
        (with-temp-buffer         
          (insert html)
          (libxml-parse-html-region (point-min) (point-max) base-url))
      '(i () "Rally-mode: libxml2 functionality is unavailable"))))
+
+(defun rally-libxml-supported-p ()
+  "Return non-nil if `libxml-parse-html-region' is available."
+  (with-temp-buffer
+    (insert "<html></html>")
+    (and (fboundp 'libxml-parse-html-region)
+         (not (null (libxml-parse-html-region (point-min) (point-max)))))))
 
 
 (provide 'rally-mode)
