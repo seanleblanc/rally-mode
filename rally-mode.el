@@ -26,7 +26,7 @@
 
 
 (require 'url-util)
-
+(require 'popwin)
 
 ;;; Code: 
 
@@ -39,8 +39,19 @@
   :group 'rally-mode)
 
 (define-key rally-mode-map (kbd "g") 'rally-current-iteration)
-(define-key rally-mode-map (kbd "i") 'rally-get-description)
+(define-key rally-mode-map (kbd "<SPC>") 'rally-get-description)
 (define-key rally-mode-map (kbd "r") 'rally-draw-results)
+
+
+(defcustom rally-detail-pane-position 'bottom
+  "Position of the popup entry pane."
+  :group 'rally-mode
+  :type '(choice (const left) (const right) (const top) (const bottom)))
+
+(defcustom rally-detail-pane-size 0.75
+  "Size (width or height, depending on position) of the popup entry pane."
+  :group 'rally-mode
+  :type 'number)
 
 
 (defvar xyz-block-authorisation nil 
@@ -145,14 +156,22 @@
 		  (assoc-val 'ToDo parsed-json)
 		  )))
 
+(defun rally-format-header (str)
+  (propertize str
+	      'face
+	      `(:background ,(rally-shine-color (face-background 'default) +.2) :foreground ,(rally-shine-color (face-foreground 'default) +.2) :weight bold )))
+							    
+			    
+			    
+
 (defun rally-write-header ()
-  (insert (propertize (format rally-line-string
+  (insert (rally-format-header (format rally-line-string
 		    "Story"
 		    "Description"
 		    "Status"
 		    "Est."
 		    "ToDo"
-		    ) 'face `(:background ,(rally-shine-color (face-background 'default) +.2) :foreground ,(rally-shine-color (face-foreground 'default) +.2) :weight bold ))))
+		    ) )))
 
 
 (rally-shine-color (face-foreground 'default) -.6)
@@ -179,25 +198,65 @@
 (defun rally-current-iteration ()
   "Pulls up current iteration information for the supplied user."
   (interactive)
-  
-  ;; (let ((rally-current-iteration-buffer (rally-get-buffer)))
-  ;;   (switch-to-buffer rally-current-iteration-buffer)
-  ;;   (rally-mode)
-  ;;   (let (buffer-read-only)
       (progn 
 	(setq rally-tasks-cache (rally-fetch-and-parse-current-iteration-info))
 	(rally-draw-results)))
 
-	;; (erase-buffer)
-	;; (rally-write-output-to-buffer rally-current-iteration-buffer rally-tasks-cache)))))
 
 (defun rally-extract-description (idx)
   (assoc 'Description (nth idx rally-tasks-cache)))
 
+
 (defun rally-get-description ()
   "Get detailed description of story/defect."
   (interactive)
-  (print (rally-extract-description (- (line-number-at-pos) 2))))
+  (rally-display-description
+   (cdr (rally-extract-description (- (line-number-at-pos) 2)))))
+
+
+(defun rally-get-detail-buffer ()
+  (get-buffer-create "*rally-detail*"))
+
+
+;; (defun rally-display-description (html)
+;;   (let ((rally-detail-buffer (rally-get-detail-buffer)))
+;;     (with-current-buffer rally-detail-buffer
+;;     (let (buffer-read-only)
+;;     (progn          
+;;       (erase-buffer)
+;;       (insert html)
+;;       (shr-render-buffer rally-detail-buffer ))))))
+  
+(defun rally-display-description (html)
+  "Insert Story description html into buffer"
+  (let
+    (
+     (rally-detail-buffer (rally-get-detail-buffer)))
+    (rally-switch-pane rally-detail-buffer)
+    (let (buffer-read-only)
+      (progn
+	(erase-buffer)
+	(rally-insert-html html)
+	(beginning-of-buffer)))
+    (other-window 1)))
+
+
+(defun rally-switch-pane (buff)
+  "Display BUFF in a popup window."
+  (popwin:popup-buffer buff
+                       :position rally-detail-pane-position
+                       :width rally-detail-pane-size
+                       :height rally-detail-pane-size
+                       :stick t
+                       :dedicated t))
+
+(defun rally-insert-html (html &optional base-url)
+  (shr-insert-document
+   (if (elfeed-libxml-supported-p)
+       (with-temp-buffer         
+         (insert html)
+         (libxml-parse-html-region (point-min) (point-max) base-url))
+     '(i () "Rally-mode: libxml2 functionality is unavailable"))))
 
 
 (provide 'rally-mode)
