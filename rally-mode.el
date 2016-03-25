@@ -5,7 +5,7 @@
 ;; Maintainer: Sean LeBlanc <seanleblanc@gmail.com>
 ;; Created: 15 Oct 2015
 ;; Version: 1.2
-;; Package-Requires: ((url-util ) (popwin))
+;; Package-Requires: ((popwin 1.0.0))
 ;; Keywords: Rally, CA, agile
 ;; Homepage: https://pragcraft.wordpress.com/
 
