@@ -29,8 +29,6 @@
 
 ;; To use - M-x rally-current-iteration, enter Rally username and password.
 
-
-;(require 'url-util)
 (require 'popwin)
 
 ;;; Code: 
@@ -62,7 +60,6 @@
   "Size (width or height, depending on position) of the popup entry pane."
   :group 'rally-mode
   :type 'number)
-
 
 (defvar xyz-block-authorisation nil 
    "Flag whether to block url.el's usual interactive authorisation procedure")
@@ -117,10 +114,6 @@
 	       username 
 	       password))
 
-;; TODO - better way?
-;(defun assoc-val (key lst)
-;  (cdr (assoc key lst)))
-
 (defun rally-extract-info (lst)
   (list
    `(TaskName . ,(assoc-default '_refObjectName lst ))
@@ -129,19 +122,15 @@
    (assoc 'State lst)
    (assoc 'ToDo lst)
    (assoc 'Estimate lst)
-   (assoc 'FormattedID lst)
-   
+   (assoc 'FormattedID lst)   
    `(WorkItemName . ,(assoc-default 'FormattedID (find 'WorkProduct lst :key #'car)))
    `(Description . ,(assoc-default 'Description (find 'WorkProduct lst :key #'car ) ))
    ))
-
 
 (defun rally-fetch-current-iteration-info-as-json ()
   (rally-current-iteration-info
    (setq rally-user (read-string "Rally user/email:" (if (boundp 'rally-user) rally-user nil)))
    (setq rally-password (read-passwd "Rally password:" nil (if (boundp 'rally-password) rally-password nil )))))
-
-;(if (boundp 'rally-password) rally-password nil)
 
 (defun rally-parse-json-results (json-string)
   (progn
@@ -194,7 +183,6 @@
 		    "ToDo"
 		    ) )))
 
-
 (rally-shine-color (face-foreground 'default) -.6)
 (face-background 'default)
 
@@ -202,7 +190,6 @@
 (defun rally-write-output-to-buffer (buf parsed-json)
   (with-current-buffer buf 
     (rally-write-header)
-		   
     (mapcar #'rally-write-task-line parsed-json)))
 
 (defun rally-draw-results ()
@@ -215,7 +202,6 @@
       (erase-buffer)
       (rally-write-output-to-buffer (rally-get-buffer) rally-tasks-cache)))))
 
-
 (defun rally-current-iteration ()
   "Pulls up current iteration information for the supplied user."
   (interactive)
@@ -223,10 +209,8 @@
 	(setq rally-tasks-cache (rally-fetch-and-parse-current-iteration-info))
 	(rally-draw-results)))
 
-
 (defun rally-extract-description (idx)
   (assoc 'Description (nth idx rally-tasks-cache)))
-
 
 (defun rally-get-description ()
   "Get detailed description of story/defect."
@@ -234,19 +218,8 @@
   (rally-display-description
    (cdr (rally-extract-description (- (line-number-at-pos) 2)))))
 
-
 (defun rally-get-detail-buffer ()
   (get-buffer-create "*rally-detail*"))
-
-
-;; (defun rally-display-description (html)
-;;   (let ((rally-detail-buffer (rally-get-detail-buffer)))
-;;     (with-current-buffer rally-detail-buffer
-;;     (let (buffer-read-only)
-;;     (progn          
-;;       (erase-buffer)
-;;       (insert html)
-;;       (shr-render-buffer rally-detail-buffer ))))))
   
 (defun rally-display-description (html)
   "Insert Story description html into buffer"
@@ -260,7 +233,6 @@
 	(rally-insert-html html)
 	(beginning-of-buffer)))
     (other-window 1)))
-
 
 (defun rally-switch-pane (buff)
   "Display BUFF in a popup window."
