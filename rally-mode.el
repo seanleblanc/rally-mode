@@ -258,5 +258,5 @@
 
 
 (provide 'rally-mode)
-;;; rally-mode ends here
+;;; rally-mode.el ends here
 
