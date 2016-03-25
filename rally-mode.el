@@ -1,6 +1,6 @@
-;;; rally-mode.el - a mode to interact with the Rally Software web site.
+;;; rally-mode.el --- a mode to interact with the Rally Software web site.
 
-;; Copyright (c) 2015 Sean LeBlanc
+;; Copyright (C) 2015 Sean LeBlanc
 ;; Author: Sean LeBlanc <seanleblanc@gmail.com>
 ;; Maintainer: Sean LeBlanc <seanleblanc@gmail.com>
 ;; Created: 15 Oct 2015
