@@ -115,14 +115,14 @@
 (defun rally-extract-info (lst)
   (list
    `(TaskName . ,(assoc-default '_refObjectName lst ))
-   `(WorkItemDescription . ,(assoc-default '_refObjectName (find 'WorkProduct lst :key #'car ) ))
-   `(SprintName . ,(assoc-default '_refObjectName (find 'Iteration lst :key #'car ) ))
+   `(WorkItemDescription . ,(assoc-default '_refObjectName (cl-find 'WorkProduct lst :key #'car ) ))
+   `(SprintName . ,(assoc-default '_refObjectName (cl-find 'Iteration lst :key #'car ) ))
    (assoc 'State lst)
    (assoc 'ToDo lst)
    (assoc 'Estimate lst)
    (assoc 'FormattedID lst)   
-   `(WorkItemName . ,(assoc-default 'FormattedID (find 'WorkProduct lst :key #'car)))
-   `(Description . ,(assoc-default 'Description (find 'WorkProduct lst :key #'car ) ))
+   `(WorkItemName . ,(assoc-default 'FormattedID (cl-find 'WorkProduct lst :key #'car)))
+   `(Description . ,(assoc-default 'Description (cl-find 'WorkProduct lst :key #'car ) ))
    ))
 
 (defun rally-fetch-current-iteration-info-as-json ()
