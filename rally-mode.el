@@ -229,7 +229,7 @@
       (progn
 	(erase-buffer)
 	(rally-insert-html html)
-	(beginning-of-buffer)))
+	(goto-char (point-min))))
     (other-window 1)))
 
 (defun rally-switch-pane (buff)
