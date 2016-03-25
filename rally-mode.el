@@ -1,11 +1,16 @@
 ;;; rally-mode --- Summary
 ;;; rally-mode.el - a mode to interact with the Rally Software web site.
 
-;;; Commentary:
+;;; Commentary: A mode for the Rally website.
 
 ;; Copyright (c) 2015 Sean LeBlanc
 
 ;; Author: Sean LeBlanc
+;; Version: 1.2
+;; Package-Requires: ((url-util ) (popwin))
+;; Keywords: Rally, CA, agile
+;; URL: https://pragcraft.wordpress.com/
+
 
 ;; rally-mode is free software; you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by
@@ -25,7 +30,7 @@
 ;; To use - M-x rally-current-iteration, enter Rally username and password.
 
 
-(require 'url-util)
+;(require 'url-util)
 (require 'popwin)
 
 ;;; Code: 
@@ -38,9 +43,14 @@
   "Major mode for interacting with Rally website."
   :group 'rally-mode)
 
+; Refresh:
 (define-key rally-mode-map (kbd "g") 'rally-current-iteration)
+
+; Display the contents of the story/defect:
 (define-key rally-mode-map (kbd "<SPC>") 'rally-get-description)
-(define-key rally-mode-map (kbd "r") 'rally-draw-results)
+
+; Handy for experimenting with display w/o re-fetching data
+(define-key rally-mode-map (kbd "r") 'rally-draw-results)   
 
 
 (defcustom rally-detail-pane-position 'bottom
@@ -92,7 +102,7 @@
   `(
     (query ,(format "((Owner.Name = %s ) AND (( Iteration.StartDate <= today ) AND (Iteration.EndDate >= today)) )" username ) )
     (order Rank)
-    (fetch "true,WorkProduct,Tasks,Iteration,Estimate,State,ToDo,Name,Description")
+    (fetch "true,WorkProduct,Tasks,Iteration,Estimate,State,ToDo,Name,Description,Type")
     ))
 
 (defun rally-make-query (username password)
@@ -108,19 +118,21 @@
 	       password))
 
 ;; TODO - better way?
-(defun assoc-val (key lst)
-  (cdr (assoc key lst)))
+;(defun assoc-val (key lst)
+;  (cdr (assoc key lst)))
 
 (defun rally-extract-info (lst)
   (list
-   `(TaskName . ,(assoc-val '_refObjectName lst ))
-   `(WorkItemDescription . ,(assoc-val '_refObjectName (find 'WorkProduct lst :key #'car ) ))
-   `(SprintName . ,(assoc-val '_refObjectName (find 'Iteration lst :key #'car ) ))
+   `(TaskName . ,(assoc-default '_refObjectName lst ))
+   `(WorkItemDescription . ,(assoc-default '_refObjectName (find 'WorkProduct lst :key #'car ) ))
+   `(SprintName . ,(assoc-default '_refObjectName (find 'Iteration lst :key #'car ) ))
    (assoc 'State lst)
    (assoc 'ToDo lst)
    (assoc 'Estimate lst)
-   `(WorkItemName . ,(assoc-val 'FormattedID (find 'WorkProduct lst :key #'car)))
-   `(Description . ,(assoc-val 'Description (find 'WorkProduct lst :key #'car ) ))
+   (assoc 'FormattedID lst)
+   
+   `(WorkItemName . ,(assoc-default 'FormattedID (find 'WorkProduct lst :key #'car)))
+   `(Description . ,(assoc-default 'Description (find 'WorkProduct lst :key #'car ) ))
    ))
 
 
@@ -129,10 +141,13 @@
    (setq rally-user (read-string "Rally user/email:" (if (boundp 'rally-user) rally-user nil)))
    (setq rally-password (read-passwd "Rally password:" nil (if (boundp 'rally-password) rally-password nil )))))
 
-(if (boundp 'rally-password) rally-password nil)
+;(if (boundp 'rally-password) rally-password nil)
 
 (defun rally-parse-json-results (json-string)
-  (json-read-from-string json-string))
+  (progn
+    (rally-log json-string)
+    (json-read-from-string json-string)
+    ))
 
 (defun rally-get-task-list (parsed-json)
   (cdr (assoc 'Results (assoc 'QueryResult parsed-json))))
@@ -145,15 +160,17 @@
   (get-buffer-create "*rally-current-iteration*"))
 
 (defvar rally-line-string nil "Formatting for Rally info.")
+;(setq rally-line-string "%-6s/%-6s %-90.90s %-10s %-4s %-4s\n")
 (setq rally-line-string "%-6s %-90.90s %-10s %-4s %-4s\n")
 
 (defun rally-write-task-line (parsed-json)
   (insert (format rally-line-string
-		  (assoc-val 'WorkItemName parsed-json)
-		  (assoc-val 'WorkItemDescription parsed-json)
-		  (assoc-val 'State parsed-json)
-		  (assoc-val 'Estimate parsed-json)
-		  (assoc-val 'ToDo parsed-json)
+		  (assoc-default 'WorkItemName parsed-json)
+		  ;(assoc-default 'FormattedID parsed-json)
+		  (assoc-default 'WorkItemDescription parsed-json)
+		  (assoc-default 'State parsed-json)
+		  (assoc-default 'Estimate parsed-json)
+		  (assoc-default 'ToDo parsed-json)
 		  )))
 
 (defun rally-format-header (str)
@@ -161,7 +178,11 @@
 	      'face
 	      `(:background ,(rally-shine-color (face-background 'default) +.2) :foreground ,(rally-shine-color (face-foreground 'default) +.2) :weight bold )))
 							    
-			    
+(defun rally-log (str)
+  (progn
+    ;(message "trying to log")
+    (message "%s" str)
+    (message "")))		    
 			    
 
 (defun rally-write-header ()
