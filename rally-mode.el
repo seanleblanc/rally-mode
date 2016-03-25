@@ -1,17 +1,16 @@
-;;; rally-mode --- Summary
 ;;; rally-mode.el - a mode to interact with the Rally Software web site.
 
-;;; Commentary: A mode for the Rally website.
-
 ;; Copyright (c) 2015 Sean LeBlanc
-
-;; Author: Sean LeBlanc
+;; Author: Sean LeBlanc <seanleblanc@gmail.com>
+;; Maintainer: Sean LeBlanc <seanleblanc@gmail.com>
+;; Created: 15 Oct 2015
 ;; Version: 1.2
 ;; Package-Requires: ((url-util ) (popwin))
 ;; Keywords: Rally, CA, agile
-;; URL: https://pragcraft.wordpress.com/
+;; Homepage: https://pragcraft.wordpress.com/
 
-
+;;; Commentary: A mode for the Rally website.
+;;
 ;; rally-mode is free software; you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 2, or (at your option)
@@ -24,14 +23,13 @@
 ;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with rally-mode.  If not, see http://www.gnu.org/licenses.
-
-
-
+;;
 ;; To use - M-x rally-current-iteration, enter Rally username and password.
+
+;;; Code: 
 
 (require 'popwin)
 
-;;; Code: 
 
 (defvar rally-user)
 (defvar rally-password)
