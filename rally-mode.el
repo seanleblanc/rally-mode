@@ -200,6 +200,7 @@
       (erase-buffer)
       (rally-write-output-to-buffer (rally-get-buffer) rally-tasks-cache)))))
 
+;;;###autoload
 (defun rally-current-iteration ()
   "Pulls up current iteration information for the supplied user."
   (interactive)
