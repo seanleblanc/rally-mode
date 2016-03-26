@@ -29,7 +29,7 @@
 ;;; Code: 
 
 (require 'popwin)
-
+(require 'json)
 
 (defvar rally-user)
 (defvar rally-password)
