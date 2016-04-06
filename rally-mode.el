@@ -33,6 +33,7 @@
 
 (defvar rally-user)
 (defvar rally-password)
+(defvar rally-api-key)
 (defvar rally-tasks-cache nil)
 
 (define-derived-mode rally-mode special-mode "rally-mode"
@@ -78,6 +79,13 @@
   (concat url-server-string "?"
 	  (url-build-query-string params)))
 
+(defun rally--auth-header (user pass)
+  (if (boundp 'rally-api-key)
+      (cons "zsessionid" rally-api-key)
+    (cons "Authorization" (concat "Basic "
+                                  (base64-encode-string
+                                   (concat user ":" pass))))))
+
 (defun rally-basic-auth (url user pass)
   ;;(princ url) 
   (let ((xyz-block-authorisation t)
@@ -85,9 +93,7 @@
 	(url-queue-timeout 60)
 	(url-request-extra-headers 
 	 `(("Content-Type" . "application/xml")
-	   ("Authorization" . ,(concat "Basic "
-				       (base64-encode-string
-					(concat user ":" pass)))))))
+           ,(rally--auth-header user pass))))
      (with-current-buffer (url-retrieve-synchronously url t)
        (delete-region 1 url-http-end-of-headers)
        (buffer-string)
