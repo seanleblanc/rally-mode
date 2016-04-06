@@ -93,23 +93,23 @@
        (buffer-string)
        )))
 
-(defun rally-make-url-lst (username password)
+(defun rally-make-url-lst (username)
   `(
     (query ,(format "((Owner.Name = %s ) AND (( Iteration.StartDate <= today ) AND (Iteration.EndDate >= today)) )" username ) )
     (order Rank)
     (fetch "true,WorkProduct,Tasks,Iteration,Estimate,State,ToDo,Name,Description,Type")
     ))
 
-(defun rally-make-query (username password)
+(defun rally-make-query (username)
    (rally-build-url
 	      "https://rally1.rallydev.com/slm/webservice/v2.0/task"
-	      (rally-make-url-lst username password)
+	      (rally-make-url-lst username)
 	       ))
 
 (defun rally-current-iteration-info (username password)
   (rally-basic-auth
-   (rally-make-query username password) 
-	       username 
+   (rally-make-query username)
+	       username
 	       password))
 
 (defun rally-extract-info (lst)
