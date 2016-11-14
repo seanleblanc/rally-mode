@@ -4,7 +4,7 @@
 ;; Author: Sean LeBlanc <seanleblanc@gmail.com>
 ;; Maintainer: Sean LeBlanc <seanleblanc@gmail.com>
 ;; Created: 15 Oct 2015
-;; Version: 1.2
+;; Version: 1.3
 ;; Package-Requires: ((popwin "1.0.0"))
 ;; Keywords: Rally, CA, agile
 ;; Homepage: https://pragcraft.wordpress.com/
@@ -219,7 +219,12 @@
 
 (defun rally-get-detail-buffer ()
   (get-buffer-create "*rally-detail*"))
-  
+
+
+(defun rally--clean-html (html)
+  "Search/replace on problematic character sequences such as smart quotes"
+  (replace-regexp-in-string "\342\200\235" "\"" (replace-regexp-in-string "\342\200\234" "\"" html)))
+
 (defun rally-display-description (html)
   "Insert Story description html into buffer"
   (let
@@ -229,7 +234,7 @@
     (let (buffer-read-only)
       (progn
 	(erase-buffer)
-	(rally-insert-html html)
+	(rally-insert-html (rally--clean-html html))
 	(goto-char (point-min))))
     (other-window 1)))
 
